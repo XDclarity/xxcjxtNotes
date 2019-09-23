@@ -1,0 +1,386 @@
+//登录:
+void C信息管理Dlg::OnBnClickedlogin()
+{
+	 struct  userInfo	user;
+	 this->UpdateData(true);
+	 int findFlag=0;
+     ifstream is("user.txt");
+	 if(!is)
+	 {
+		  is.close();
+	      MessageBox(_T("该帐号不存在，请先注册！"));
+	      return;
+	 }
+	while(is.eof()==0)
+	{
+		is.read((char *)&user,sizeof(user));
+		CString UserNo,UserPWD;
+		string s=user.userNo;
+        UserNo=s.c_str(); 
+		s=user.userPWD;
+        UserPWD=s.c_str(); 
+	    if(UserNo==this->m_UserNo && UserPWD==this->m_UserPWD)
+		{
+            findFlag=1;
+			break;
+		}
+	   
+	}
+   is.close();
+   if(findFlag==1)
+   {
+	    Reg obj;
+        this-> OnCancel ();
+        obj.Reg();
+
+   }
+   else
+   {
+	   MessageBox(_T("帐号或密码错误！"));
+	   return;
+	 
+   }
+
+//注册:
+void Reg::OnBnClickedSave()
+{
+		USES_CONVERSION;
+	 struct  userInfo	user;
+	  this->UpdateData(true);
+      
+	  if(m_UserNo==""||m_UserPWD=="")
+	  {
+	  MessageBox(_T("信息不能为空"));
+	  }
+	
+
+	 const char* b = W2A(m_UserNo.GetBuffer());
+	  strcpy(user.userNo,b);
+      m_UserNo.ReleaseBuffer();
+
+	  b = W2A(m_UserPWD.GetBuffer());
+	  strcpy(user.usersex,b);
+      m_UserPWD.ReleaseBuffer();
+
+	 int findFlag=0;
+     ifstream is("user.txt");
+	 if(!is)//user.txt文件不存在
+	 {
+		 is.close();
+	      ofstream os("user.txt",ios::app);//文件user.txt存在，则打开该文件，若文件user.txt不存在参数ios::app表示文件末尾添加内容（记录）
+	      os.write((char *)&user,sizeof(user));//把结构体user的数据写到文件user.txt的末尾
+	      os.close();//关闭文件user.txt
+	      MessageBox(_T("保存成功！"));
+	      return;
+	 }
+    //user.txt文件存在
+	while(is.eof()==0)
+	{
+		struct  userInfo	user1;
+		is.read((char *)&user1,sizeof(user1));
+		CString UserNo;
+		string s=user1.userNo;
+        UserNo=s.c_str(); 
+	    if(UserNo==this->m_UserNo)
+		{
+            findFlag=1;
+			break;
+		}
+	   
+	}
+   is.close();
+   if(findFlag==1)
+   {
+	   MessageBox(_T("该帐号存在！"));
+	   return;
+	 
+   }
+
+	  ofstream os("user.txt",ios::app);//文件user.txt存在，则打开该文件，若文件user.txt不存在参数ios::app表示文件末尾添加内容（记录）
+	  os.write((char *)&user,sizeof(user));//把结构体user的数据写到文件user.txt的末尾
+	  os.close();//关闭文件user.txt
+	  MessageBox(_T("保存成功！"));
+	CDialogEx::OnOK();
+}
+
+//学生界面:
+BOOL Student::OnInitDialog()
+{
+
+	CDialog::OnInitDialog();
+	m_StudentControl.InsertColumn(0,_T("学号"),LVCFMT_LEFT,100);
+	m_StudentControl.InsertColumn(1,_T("姓名"),LVCFMT_LEFT,100);
+	m_StudentControl.InsertColumn(2,_T("性别"),LVCFMT_LEFT,100);
+	
+	return 0;
+
+}
+
+//添加:
+void Student::OnBnClickedAdd()
+{
+	USES_CONVERSION;
+	 struct  userInfo	student;
+	  this->UpdateData(true);
+      
+	  if(m_no==""||m_name==""){MessageBox(_T("请填写完整"));}
+	  else{
+	  const char* b = W2A(m_no.GetBuffer());
+	  strcpy(student.userNo,b);//把字符串m_Name 的值赋给字符数组user.name
+      m_no.ReleaseBuffer();
+
+	  b= W2A(m_name.GetBuffer());
+	  strcpy(student.userName,b);
+      m_name.ReleaseBuffer();
+
+	  b = W2A(m_sex.GetBuffer());
+	  strcpy(student.usersex,b);
+	  m_sex.ReleaseBuffer();}
+	  
+	 int findFlag=0;
+     ifstream is("student.txt");
+	 if(!is)
+	 {
+		  is.close();
+	      ofstream os("student.txt",ios::app);
+	      os.write((char *)&student,sizeof(student));
+	      os.close();
+
+	      MessageBox(_T("添加成功！"));
+		int nItem=m_StudentControl.GetItemCount();
+		
+
+		CString tmpstr;
+		string s=student.userNo;
+        tmpstr=s.c_str(); 
+
+	   	m_StudentControl.InsertItem(nItem,tmpstr);
+
+        m_StudentControl.SetItemText(nItem,0,tmpstr);
+		//s=student.userName;
+        //tmpstr=s.c_str(); 
+	    m_StudentControl.SetItemText(nItem,1,tmpstr);
+
+		//s=student.usersex;
+        //tmpstr=s.c_str();
+		
+	    m_StudentControl.SetItemText(nItem,2,tmpstr); 
+		 
+	     
+	      return;
+	 }
+   
+
+
+	while(is.eof()==0)
+	{
+		struct  userInfo user1;
+		is.read((char *)&user1,sizeof(user1));
+		CString UserNo;
+		string s=user1.userNo;
+        UserNo=s.c_str(); 
+	    if(UserNo==this->m_no)
+		{
+            findFlag=1;
+			break;
+		}
+	   
+	}
+   is.close();
+   if(findFlag==1)
+   {
+	   MessageBox(_T("该帐号存在！"));
+	   return;
+	 
+   }
+       is.close();
+	  ofstream os("student.txt",ios::app);//文件student.txt存在，则打开该文件，若文件student.txt不存在参数ios::app表示文件末尾添加内容（记录）
+	  os.write((char *)&student,sizeof(student));//把结构体student的数据写到文件user.txt的末尾
+	  os.close();
+	  MessageBox(_T("添加成功！"));
+	  m_no=_T("");
+      m_name=_T("");
+
+	   this->UpdateData(false);
+
+	  
+
+      ifstream is1("student.txt");
+	 int count=0;
+	while(is1.eof()==0)
+	{
+		is1.read((char *)&student,sizeof(student));
+	    count++;
+	    
+	}
+    is1.close();
+	 m_StudentControl.DeleteAllItems();
+   ifstream is2("student.txt");
+	for(int i=1;i<count;i++)
+	{
+		
+		is2.read((char *)&student,sizeof(student));
+		int nItem=m_StudentControl.GetItemCount();
+
+		CString tmpstr;
+		string s=student.userNo;
+        tmpstr=s.c_str(); 
+		if(tmpstr=="")
+			continue;
+	   	m_StudentControl.InsertItem(nItem,tmpstr);
+
+        //s=student.userNo;
+        //tmpstr=s.c_str(); 
+        m_StudentControl.SetItemText(nItem,0,tmpstr);
+
+       s=student.userName;
+        tmpstr=s.c_str(); 
+	    m_StudentControl.SetItemText(nItem,1,tmpstr);
+
+		s=student.usersex;
+        tmpstr=s.c_str();
+	    m_StudentControl.SetItemText(nItem,2,tmpstr);  
+	}
+
+	
+}
+
+//删除:
+void Student::OnBnClickedDel()
+{
+	int item_count=m_StudentControl.GetItemCount();
+	if(item_count==0)
+	{
+		MessageBox(_T("列表为空,不能删除学生信息!"));
+		return;
+	}
+
+	unsigned long position = NULL;
+	int findFlag=0;
+	 this->UpdateData(true);
+	 	 if(m_no=="")
+	 {
+		  this->MessageBox(_T("请输入要删除的学生学号!"));
+		  return;
+	 }
+    struct  scoreInfo	score;
+	
+    ifstream is("student.txt");
+	while(is.eof()==0)
+	{
+		position = is.tellg();
+		is.read((char *)&score,sizeof(score));
+		CString sno;
+		string s=score.no;
+        sno=s.c_str();
+	    if(sno==this->m_no)
+		{
+            findFlag=1;
+			break;
+		}
+	   
+	}
+	is.close();
+	if(findFlag==0)
+   {
+	    this->MessageBox(_T("该学生不存在!"));
+	   return;
+   }
+	ofstream os("student.txt",ios::in|ios::ate);
+	os.seekp(position);
+	strcpy(score.no,"");
+	strcpy(score.name,"");
+	strcpy(score.sex,"");
+	os.write((char *)&score,sizeof(score));
+	os.close();
+	 this->MessageBox(_T("删除成功"));
+	   m_no=_T("");
+       m_name=_T("");
+      ifstream is1("student.txt");
+	 int count=0;
+	while(is1.eof()==0)
+	{
+		is1.read((char *)&score,sizeof(score));
+	    count++;
+	}
+    is1.close();
+	
+	 m_StudentControl.DeleteAllItems();
+   
+
+        
+	
+
+	 this->UpdateData(false);
+}
+//清空:
+void Student::OnBnClickedClear()
+{
+		int item_count = m_StudentControl.GetItemCount();
+	if(item_count == 0)
+	{
+		MessageBox(_T("列表为空,不能清空学生信息!"));
+		return;
+	}
+	m_StudentControl.DeleteAllItems();
+	MessageBox(_T("已清空所有学生信息!"));
+}
+
+//查询:
+void Student::OnBnClickedCheck()
+{
+	int findFlag=0;
+	 this->UpdateData(true);
+	 if(m_no=="")
+	 {
+		  this->MessageBox(_T("请输入要查询的学生学号!"));
+		  return;
+	 }
+	struct  userInfo student;
+	ifstream is("student.txt");
+	while(is.eof()==0)
+	{
+		
+		is.read((char *)&student,sizeof(student));
+		CString UserNo;
+		string s=student.userName;
+        UserNo=s.c_str(); 
+	    if(UserNo==this->m_no)
+		{
+            findFlag=1;
+			break;
+		}
+		
+		//MessageBox((m_no));
+	}
+   is.close();
+   if(findFlag==1)
+   {
+	   CString tmpstr;
+
+		string s=student.userName;
+
+        tmpstr=s.c_str();
+
+	   m_no=tmpstr;
+
+	   s=student.userNo;
+
+        tmpstr=s.c_str();
+
+		 m_name=tmpstr;
+
+  	   
+   }
+
+   else
+   {
+	    this->MessageBox(_T("该学生不存在!"));
+	   m_no=_T("");
+       m_name=_T("");
+  	   m_sex=_T("");
+   }
+   
+	 this->UpdateData(false);
+
+}
